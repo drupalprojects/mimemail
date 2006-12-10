@@ -210,7 +210,9 @@ function _mimemail_file($file = NULL, $type = '') {
     return $file;
   }
   
-  return $files;
+  $ret = $files;
+  $files = array();
+  return $ret;
 }
 
 /**

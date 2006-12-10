@@ -27,47 +27,47 @@ function mimemail_settings() {
   
   $form = array();
   $form['site_mail'] = array(
-  		'#type'          => 'textfield', 
-  		'#title'         => t('E-mail address'), 
-  		'#default_value' => variable_get('site_mail', ini_get('sendmail_from')), 
-  		'#size' => 60, 
-  		'#maxlength' => 128, 
-  		'#description' => t('A valid e-mail address for this website, used by the auto-mailer during registration, new password requests, notifications, etc.')
+      '#type'          => 'textfield', 
+      '#title'         => t('E-mail address'), 
+      '#default_value' => variable_get('site_mail', ini_get('sendmail_from')), 
+      '#size' => 60, 
+      '#maxlength' => 128, 
+      '#description' => t('A valid e-mail address for this website, used by the auto-mailer during registration, new password requests, notifications, etc.')
   );
   $form['mimemail']['mimemail_textonly'] = array(
-    '#type'	         => 'checkbox',
-    '#title'	         => t('Plaintext email only'),
-    '#default_value'	 => variable_get('mimemail_textonly', 0),
-    '#description'	   => t('This option disables the use of email messages with graphics and styles.  All messages will be converted to plain text.'),
+    '#type'           => 'checkbox',
+    '#title'           => t('Plaintext email only'),
+    '#default_value'   => variable_get('mimemail_textonly', 0),
+    '#description'     => t('This option disables the use of email messages with graphics and styles.  All messages will be converted to plain text.'),
   );
   
   // hide the settings if only 1 engine is available
   if (count($engines == 1)) {
     variable_set('mimemail_engine',key($engines));
     $form['mimemail_engine'] = array(
-  			'#type'          => 'hidden',
-	  		'#title'         => t('E-mail engine'), 
-	  		'#default_value' => variable_get('mimemail_engine', 'mail'), 
-	  		'#options'       => $engines, 
-	  		'#description'   => t('Choose an e-mail engine for sending mails from your site.')
-	  );
+        '#type'          => 'hidden',
+        '#title'         => t('E-mail engine'), 
+        '#default_value' => variable_get('mimemail_engine', 'mail'), 
+        '#options'       => $engines, 
+        '#description'   => t('Choose an e-mail engine for sending mails from your site.')
+    );
   }
   else {
     $form['mimemail_engine'] = array(
-  			'#type'          => 'select',
-	  		'#title'         => t('E-mail engine'), 
-	  		'#default_value' => variable_get('mimemail_engine', 'mail'), 
-	  		'#options'       => $engines, 
-	  		'#description'   => t('Choose an e-mail engine for sending mails from your site.')
-	  );
+        '#type'          => 'select',
+        '#title'         => t('E-mail engine'), 
+        '#default_value' => variable_get('mimemail_engine', 'mail'), 
+        '#options'       => $engines, 
+        '#description'   => t('Choose an e-mail engine for sending mails from your site.')
+    );
   }
 
-	if (variable_get('mimemail_engine', 0)) {
-	  $settings = module_invoke(variable_get('mimemail_engine', 'mail'), 'mailengine', 'settings');
+  if (variable_get('mimemail_engine', 0)) {
+    $settings = module_invoke(variable_get('mimemail_engine', 'mail'), 'mailengine', 'settings');
     if ($settings) {
         $form['mimemail_engine_settings'] = array(
-      		'#type'        => 'fieldset', 
-      		'#title'       => t('Engine specific settings'),
+          '#type'        => 'fieldset', 
+          '#title'       => t('Engine specific settings'),
       );
       foreach ($settings as $name => $value) {
         $form['mimemail_engine_settings'][$name] = $value;
@@ -87,16 +87,16 @@ function mimemail_user($op, &$edit, &$user, $category='') {
   if ( $op == 'form' && $category == 'account') { 
     $form = array();
     $form['mimemail'] = array(
-    		'#type'          => 'fieldset',
-    		'#title'         => t('Email settings'),
-    		'#weight'        => 5, 
-    		'#collapsible' => true,
+        '#type'          => 'fieldset',
+        '#title'         => t('Email settings'),
+        '#weight'        => 5, 
+        '#collapsible' => true,
     );
     $form['mimemail']['mimemail_textonly'] = array(
-      '#type'	         => 'checkbox',
-      '#title'	         => t('Plaintext email only'),
-      '#default_value'	 => $user->mimemail_textonly,
-      '#description'	   => t('Check this option if you do not wish to receive email messages with graphics and styles'),
+      '#type'           => 'checkbox',
+      '#title'           => t('Plaintext email only'),
+      '#default_value'   => $user->mimemail_textonly,
+      '#description'     => t('Check this option if you do not wish to receive email messages with graphics and styles'),
     );
     return $form;
   } 
@@ -133,15 +133,15 @@ function mimemail($sender, $recipient, $subject, $body, $plaintext=null, $header
   
   if (is_null($sender)) {        // use site default for sender
     $sender = array(
-    		'name' => variable_get('site_name', 'Drupal'),
-    		'mail' => variable_get('site_mail', ini_get('sendmail_from')),
+        'name' => variable_get('site_name', 'Drupal'),
+        'mail' => variable_get('site_mail', ini_get('sendmail_from')),
     );
   }
   
   if (is_null($recipient)) {     // use site default for recipient
     $recipient = array(
-    		'name' => variable_get('site_name', 'Drupal'),
-    		'mail' => variable_get('site_mail', ini_get('sendmail_from')),
+        'name' => variable_get('site_name', 'Drupal'),
+        'mail' => variable_get('site_mail', ini_get('sendmail_from')),
     );
   }
   
@@ -192,11 +192,11 @@ function mimemail_get_engines() {
 function mimemail_mailengine($op, $message = array()) {
   //default values
   $message = array_merge( array(
-  		'address' => '', 
-  		'subject' => '', 
-  		'body' => '', 
-  		'headers' => '', 
-  		'parameters' => ''), $message);
+      'address' => '', 
+      'subject' => '', 
+      'body' => '', 
+      'headers' => '', 
+      'parameters' => ''), $message);
       
   switch ($op) {
     case 'name':
