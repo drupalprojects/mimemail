@@ -139,7 +139,8 @@ function mimemail_html_to_text($txt, $inline = FALSE) {
   }
 
   // some basic html to text conversion
-  $txt = preg_replace(_mimemail_define_search(), _mimemail_define_replace(), $txt);
+  $replace = _mimemail_html2text();
+  $txt = preg_replace(array_keys($replace), $replace, $txt);
   $txt = preg_replace("/\n\s+\n/", "\n\n", $txt);
   $txt = strip_tags($txt);
   $txt = decode_entities($txt);
@@ -422,122 +423,51 @@ function _mimemail_urls($url = 0, $refresh = FALSE) {
   return $urls;
 }
 
-/**
- *  List of preg* regular expression patterns to search for,
- *  used in conjunction with $replace.
- *  Based on / modified from html2txt.module
- */
-function _mimemail_define_search() {
-
-    $search = array(
-        "/\r/",                                       // Non-legal carriage return
-        "/[\t]+/",                                    // tabs
-        '/<script[^>]*>.*?<\/script>/i',              // <script>s -- which strip_tags supposedly has problems with
-        '!<h[12][^>]*>(.+?)</h[12]>!ie',              // h1 - h2
-        '/<h3[^>]*>(.+?)<\/h3>/ie',                   // h3
-        '/<h[456][^>]*>(.+?)<\/h[456]>/ie',           // h4 - h6
-        '!<blockquote[^>]*>!i',                       // <blockquote>
-        '!</blockquote>!i',                           // </blockquote>
-        '!</?p[^>]*>!i',                              // <p>
-        '/<br[^>]*>/i',                               // <br>
-        '!</?(b|strong)[^>]*>!i',                     // <b> and <strong>
-        '!</?(em|i)[^>]*>!i',                         // <em> and <i>
-        '/(<ul[^>]*>|<\/ul>)/i',                      // <ul> and </ul>
-        '/(<ol[^>]*>|<\/ol>)/i',                      // <ol> and </ol>
-        '/(<dl[^>]*>|<\/dl>)/i',                      // <dl> and </dl>
-        '!<li[^>]*>!i',                               // <li>
-        '!</li>!i',                                   // </li>
-        '!<dt[^>]*>!i',                               // <dt>
-        '!</dt>!i',                                   // </dt>
-        '!<dd[^>]*>!i',                               // <dd>
-        '!</dd>!i',                                   // </dd>
-        '/<hr[^>]*>/i',                               // <hr>
-        '/(<table[^>]*>|<\/table>)/i',                // <table> and </table>
-        '/(<tr[^>]*>|<\/tr>)/i',                      // <tr> and </tr>
-        '/<td[^>]*>(.+?)<\/td>/i',                    // <td> and </td>
-        '/<th[^>]*>(.+?)<\/th>/i',                    // <th> and </th>
-        '/&nbsp;/i',
-        '/&quot;/i',
-        '/&gt;/i',
-        '/&lt;/i',
-        '/&amp;/i',
-        '/&copy;/i',
-        '/&trade;/i',
-        '/&#8220;/',
-        '/&#8221;/',
-        '/&#8211;/',
-        '/&#8217;/',
-        '/&#38;/',
-        '/&#169;/',
-        '/&#8482;/',
-        '/&#151;/',
-        '/&#147;/',
-        '/&#148;/',
-        '/&#149;/',
-        '/&reg;/i',
-        '/&bull;/i',
-        '/&[&;]+;/i'
-    );
-
-    return $search;
-}
-
-/**
- *  List of pattern replacements corresponding to patterns searched.
- *  Based on / modified from html2txt.module
- */
-function _mimemail_define_replace() {
-
-    $replace = array(
-        '',                                                               // Non-legal carriage return
-        ' ',                                                              // Tabs
-        '',                                                               // <script>s -- which strip_tags supposedly has problems with
-        "\"\n------------\" .'\\1'.\"------------\n\n\"",                 // h1 - h2
-        "\"\n\n\\1\n\n\"",                                                // h3
-        "\"\n\\1\n\"",                                                    // h4 - h6
-        "\n\n\t",                                                         // <blockquote>
-        "\n\n",                                                           // </blockquote>
-        "\n\n",                                                           // <p>
-        "\n",                                                             // <br>
-        '*',                                                              // <b> and <strong>
-        '/',                                                              // <em> and <i>
-        "\n\n",                                                           // <ul> and </ul>
-        "\n\n",                                                           // <ol> and </ol>
-        "\n\n",                                                           // <dl> and </dl>
-        "  * ",                                                           // <li>
-        "\n",                                                             // </li>
-        "  * ",                                                           // <dt>
-        "\n",                                                             // </dt>
-        "\t",                                                             // <dd>
-        "\n",                                                             // </dd>
-        "\n-------------------------\n",                                  // <hr>
-        "\n\n",                                                           // <table> and </table>
-        "\n",                                                             // <tr> and </tr>
-        "\t\t\\1\n",                                                      // <td> and </td>
-        "\"\t\t\\1\n\"",                                      // <th> and </th>
-        ' ',
-        '"',
-        '>',
-        '<',
-        '&',
-        '(c)',
-        '(tm)',
-        '"',
-        '"',
-        '-',
-        "'",
-        '&',
-        '(c)',
-        '(tm)',
-        '--',
-        '"',
-        '"',
-        '*',
-        '(R)',
-        '*',
-        ''
-    );
-    return $replace;
+function _mimemail_html2text() {
+  return array(
+    "/\r/"                              => '',
+    "/[\t]+/"                           => '  ',
+    '/<script[^>]*>.*?<\/script>/i'     => '',
+    '!<h1[^>]*>(.+?)</h1>!ie'     => "\"\n\" .strtoupper('\\1').\"\n============================================================\n\"",
+    '!<h2[^>]*>(.+?)</h2>!ie'     => "\"\n------------------------------------------------------------\n\" .'\\1'.\"\n------------------------------------------------------------\n\"",
+    '/<h3[^>]*>(.+?)<\/h3>/ie'          => "\"\n\n\\1\n\n\"",
+    '/<h[456][^>]*>(.+?)<\/h[456]>/ie'  => "\"\n\\1\n\"",
+    '!<blockquote[^>]*>!i'              => "\n\n\t",
+    '!</blockquote>!i'                  => "\n\n",
+    '!</?p[^>]*>!i'                     => "\n\n",
+    '/<br[^>]*>/i'                      => "\n",
+    '/(<(u|o|d)l[^>]*>|<\/(u|o|d)l>)/i' => "\n\n",
+    '!<(li|dt)[^>]*>!i'                 => "  * ",
+    '!<dd[^>]*>!i'                      => "    ",
+    '!</(li|dt|dd)>!i'                  => "\n",
+    '/<hr[^>]*>/i'                      => "\n-------------------------\n",
+    '/(<table[^>]*>|<\/table>)/i'       => "\n\n",
+    '/(<tr[^>]*>|<\/tr>)/i'             => "\n",
+    '/<td[^>]*>(.+?)<\/td>/i'           => "\t\t\\1\n",
+    '/<th[^>]*>(.+?)<\/th>/i'           => "\"\t\t\\1\n\"",
+    '/&nbsp;/i'                         => " ",
+    '/&quot;/i'                         => '"',
+    '/&gt;/i'                           => '>',
+    '/&lt;/i'                           => '<',
+    '/&amp;/i'                          => '&',
+    '/&copy;/i'                         => '(c)',
+    '/&trade;/i'                        => '(tm)',
+    '/&#8220;/'                         => '"',
+    '/&#8221;/'                         => '"',
+    '/&#8211;/'                         => '-',
+    '/&#8217;/'                         => "'",
+    '/&#38;/'                           => '&',
+    '/&#169;/'                          => '(c)',
+    '/&#8482;/'                         => '(tm)',
+    '/&#151;/'                          => '--',
+    '/&#145;/'                          => '\'',
+    '/&#147;/'                          => '"',
+    '/&#148;/'                          => '"',
+    '/&#149;/'                          => '*',
+    '/&reg;/i'                          => '(R)',
+    '/&bull;/i'                         => '*',
+    '/&[&;]+;/i'                        => '',
+  );
 }
 
 /**
