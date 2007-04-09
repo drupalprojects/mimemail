@@ -42,7 +42,7 @@ function mimemail_settings() {
   );
   
   // hide the settings if only 1 engine is available
-  if (count($engines == 1)) {
+  if (count($engines) == 1) {
     variable_set('mimemail_engine',key($engines));
     $form['mimemail_engine'] = array(
         '#type'          => 'hidden',
