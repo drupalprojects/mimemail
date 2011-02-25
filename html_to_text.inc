@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * To generate this file from Drupal 6 mail.inc, delete mimemail_mail and
